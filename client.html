@@ -56,7 +56,7 @@ var appendMessage = function(message,flag){
   else{ 
     item.style.backgroundColor = "rgba(44, 69, 211, 0.15)"
   }
-  console.log(message)
+  // console.log(message)
   item.textContent = message;
   messages.appendChild(item);
   window.scrollTo(0, document.body.scrollHeight);
@@ -64,8 +64,8 @@ var appendMessage = function(message,flag){
 }
 socket.on('chat message', function(data) {
   console.log(data)
-  if(data.name==userName){
-    appendMessage(`You : ${input.value} `,0) 
+  if(data.name==userName+" "){
+    appendMessage(`You : ${data.message} `,0) 
   }
   else{ 
     appendMessage( `${data.name } : ${data.message}`,1)

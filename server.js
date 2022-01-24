@@ -8,18 +8,37 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 
 const redis = require("redis")
-const client=redis.createClient()
+
 const users={}
 
+
+const { promisify } = require('util');
+
+const host = "127.0.0.1"
+
+const port = '6380'
+
+//Connecting redis client
+const client = redis.createClient()
+
+client.on('connect', function () {
+    console.log("Redis Connected")
+});
+
+client.on('error', function (err) {
+    console.log("here"+err)
+});
 var sendMessages=function(socket){
-  client.lrange("messages","0","-1", (err,data)=>{  //looping through each element in this messages array inside the redis server  
-  data.map(x=>{
+  client.lrange("messages",0,-1, (err,data)=>{  //looping through each element in this messages array inside the redis server  
+ if(err) console.log(err)
+    data.map(x=>{
     const userMessage=x.split(":")  // for each string we sperate the message and the username 
     const redisUserName=userMessage[0] //save username here
     const redisMessage=userMessage[1]  //save message here
     socket.emit('chat message',{message:redisMessage , name:redisUserName}) // send message to the client who joined or reloaded (triggred this event)
   })
-  });
+ });
+ return
 }
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/client.html')
@@ -34,8 +53,8 @@ io.on('connection', (socket) => {
       users[socket.id]=userName
     })
     socket.on('chat message', (msg) => {   //it sends down to the client this msg 
-        console.log('message: ' + msg);
-         client.rPush("messages",`${users[socket.id]} : ${msg}`) //push this user's msg to the messages array saved in the redis server
+        console.log('message:' + msg);
+         client.rpush("messages",`${users[socket.id]} : ${msg}`) //push this user's msg to the messages array saved in the redis server
          socket.broadcast.emit('chat message', {message:msg , name:users[socket.id]});//send msg down to the other clients and the sender's name
       });
   });
