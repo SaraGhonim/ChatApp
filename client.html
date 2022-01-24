@@ -64,7 +64,13 @@ var appendMessage = function(message,flag){
 }
 socket.on('chat message', function(data) {
   console.log(data)
-  appendMessage( `${data.name } : ${data.message}`,1)
+  if(data.name==userName){
+    appendMessage(`You : ${input.value} `,0) 
+  }
+  else{ 
+    appendMessage( `${data.name } : ${data.message}`,1)
+
+  }
 });
 </script>
  </html>
